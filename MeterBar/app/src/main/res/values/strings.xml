@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MeterBar</string>
+
+    <string name="redraw_btn">Redraw Chart</string>
+    <string name="refill_btn">Refill Bars</string>
+
+</resources>

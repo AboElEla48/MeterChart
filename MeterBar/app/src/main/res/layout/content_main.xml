@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="vodafone.vsse.meterbar.MainActivity"
+    tools:showIn="@layout/activity_main">
+
+    <TextView
+        android:id="@+id/above_label"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:text="Dummy control relative to fragment"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="70dp"
+        android:id="@+id/below_layout"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/redraw_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/redraw_btn"/>
+
+        <Button
+            android:id="@+id/refill_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/refill_btn"/>
+
+    </LinearLayout>
+
+    <!-- Define the meter chart view -->
+    <vodafone.vsse.meterbar.meterchart.views.MeterChart
+        android:id="@+id/content_main_fragment_meter_chart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/above_label"
+        android:layout_above="@id/below_layout"
+        android:background="#EBE3E0"
+        android:layout_centerInParent="true"/>
+
+
+
+
+</RelativeLayout>
