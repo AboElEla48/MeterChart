@@ -1,9 +1,5 @@
 package vodafone.vsse.meterbar.meterchart.models;
 
-import android.graphics.drawable.Drawable;
-
-import vodafone.vsse.meterbar.meterchart.views.MeterBar;
-
 /**
  * Created by AboElEla on 3/27/2016.
  *
@@ -41,12 +37,28 @@ public class MeterInfoCircleModel {
         this.infoCircleRadius = infoCircleRadius;
     }
 
-    public void setCaptionText(MeterText captionText) {
-        this.captionText = captionText;
+    public int getInfoCircleCurrentUnits() {
+        return infoCircleCurrentUnits;
     }
 
-    public MeterText getCaptionText() {
-        return captionText;
+    public void setInfoCircleCurrentUnits(int infoCircleCurrentUnits) {
+        this.infoCircleCurrentUnits = infoCircleCurrentUnits;
+    }
+
+    public int getInfoCircleMaxUnits() {
+        return infoCircleMaxUnits;
+    }
+
+    public void setInfoCircleMaxUnits(int infoCircleMaxUnits) {
+        this.infoCircleMaxUnits = infoCircleMaxUnits;
+    }
+
+    public void setValueText(MeterValueText valueText) {
+        this.valueText = valueText;
+    }
+
+    public MeterValueText getValueText() {
+        return valueText;
     }
 
     public void setDetailsText(MeterText detailsText) {
@@ -57,7 +69,6 @@ public class MeterInfoCircleModel {
         return detailsText;
     }
 
-    private MeterText captionText;
     private MeterText detailsText;
 
     private float infoCircleRadius = 10f;
@@ -66,5 +77,8 @@ public class MeterInfoCircleModel {
     private int backgroundColor = 0xFFFFFFFF;
 
     private float infoCircleMargin = 10f;
+    private int infoCircleMaxUnits = 28;
+    private int infoCircleCurrentUnits = 16;
+    private MeterValueText valueText;
 
 }

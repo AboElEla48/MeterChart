@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 import vodafone.vsse.meterbar.meterchart.models.MeterBarModel;
 import vodafone.vsse.meterbar.meterchart.models.MeterChartModel;
+import vodafone.vsse.meterbar.meterchart.models.MeterInfoCircleModel;
 import vodafone.vsse.meterbar.meterchart.models.TooltipModel;
 import vodafone.vsse.meterbar.meterchart.utils.LogUtil;
 import vodafone.vsse.meterbar.meterchart.utils.animation.AnimationListener;
@@ -185,6 +186,18 @@ public class MeterChart extends View{
      */
     private void doChartAnimation(int animationDuration)
     {
+        if(meterChartModel.isCircleVisible())
+        {
+            // Animate info circle
+            int originalAnimationCircleValue = meterChartModel.getInfoCircleModel().getInfoCircleCurrentUnits();
+            meterChartModel.getInfoCircleModel().setInfoCircleCurrentUnits(meterChartModel.getInfoCircleModel().getInfoCircleMaxUnits());
+
+            AnimationNotifier animationNotifier = new AnimationNotifier(animationDuration, new AnimationCircleDownListener());
+            animationNotifier.addAnimationTag(Animation_Original_Circle_Val_Key, originalAnimationCircleValue);
+
+            animationNotifier.startAnimation();
+        }
+
         for(MeterBarModel meterBarModel : meterChartModel.getMeterBars()) {
             // Animate last chunk
             int size = meterBarModel.getBarChunks().size();
@@ -285,57 +298,47 @@ public class MeterChart extends View{
      */
     private void drawCircle(Canvas canvas)
     {
-        int numOfBars = meterChartModel.getMeterBars().size();
-
-        // get the dimensions of view
-        int chartWidth = getWidth();
-        int chartHeight = getHeight();
-
-        double barWidth = (double)chartWidth / (double)numOfBars - (meterChartModel.getBarsMargin() * (numOfBars-1));
-        float x = 0f;
-        float y = 0f;
-
-
-
-        // If the number of bars is 2, then draw circle between 2 bars relative to small line, otherwise, draw at the middle top
-        // of screen
         if(meterChartModel.isCircleVisible())
         {
-            double minTotal = -1;
-            MeterBarModel smallestModel= null;
-            if(numOfBars == 2)
+            // get the dimensions of view
+            int chartWidth = getWidth();
+            int chartHeight = getHeight();
+
+            MeterInfoCircleModel circleModel = meterChartModel.getInfoCircleModel();
+            float heightUnitPerPixel = (float) chartHeight / (float) circleModel.getInfoCircleMaxUnits();
+
+            float x = chartWidth / 2;
+            float y = chartHeight - heightUnitPerPixel * (float) circleModel.getInfoCircleCurrentUnits();
+
+            infoCircle.drawCircle(canvas, x, y, isCircleClicked);
+        }
+
+    }
+
+    /**
+     * Define listener for Circle animation
+     */
+    private class AnimationCircleDownListener implements  AnimationListener
+    {
+
+        @Override
+        public boolean isAnimationFinished(HashMap<String, Object> animationTags)
+        {
+            int originalCircleValue = ((Integer)animationTags.get(Animation_Original_Circle_Val_Key)).intValue();
+            if(originalCircleValue < meterChartModel.getInfoCircleModel().getInfoCircleCurrentUnits())
             {
-                int i = 0;
-                do {
-
-                    MeterBarModel meterBarModel = meterChartModel.getMeterBars().get(i);
-
-                    double ratio = meterBarModel.getChunksTotalValue() / meterBarModel.getBarMaxValue();
-                    if( minTotal == -1 || ratio < minTotal)
-                    {
-                        minTotal = ratio;
-                        smallestModel = meterBarModel;
-                    }
-
-                    i++;
-                }while ( i < numOfBars);
-
-                if(minTotal > 0)
-                {
-                    double heightUnitPerPixel = (double)canvas.getHeight() / smallestModel.getBarMaxValue();
-                    float barHeight = (float) (smallestModel.getChunksTotalValue() * heightUnitPerPixel);
-                    x = chartWidth / 2;
-                    y = chartHeight - barHeight + infoCircle.getInfoCircleHeight();
-                    infoCircle.drawCircle(canvas, x, y, isCircleClicked);
-                }
+                return false;
             }
-            else
-            {
-                // Draw at middle top of screen
-                x = chartWidth / 2;
-                y = infoCircle.getInfoCircleHeight();
-                infoCircle.drawCircle(canvas, x, y, isCircleClicked);
-            }
+            return true;
+        }
+
+        @Override
+        public void notifyAnimationStep(HashMap<String, Object> animationTags)
+        {
+            int currentUnits = meterChartModel.getInfoCircleModel().getInfoCircleCurrentUnits();
+            meterChartModel.getInfoCircleModel().setInfoCircleCurrentUnits(currentUnits - 1);
+
+            invalidate();
         }
     }
 
@@ -450,4 +453,5 @@ public class MeterChart extends View{
 
     private final String Animation_Bar_Model_Key = "Animation_Bar_Model_Key";
     private final String Animation_Original_Chunk_Val_Key = "Animation_Original_Chunk_Val_Key";
+    private final String Animation_Original_Circle_Val_Key = "Animation_Original_Circle_Val_Key";
 }

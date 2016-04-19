@@ -28,7 +28,7 @@ public class MeterInfoCircle{
         infoCirclePaintDrawer.setColor(infoCircleModel.getBackgroundColor());
 
         infoCircleDetailsPaintDrawer = PaintUtil.createTextPaint(meterInfoCircleModel.getDetailsText());
-        infoCircleCaptionPaintDrawer = PaintUtil.createTextPaint(meterInfoCircleModel.getCaptionText());
+        infoCircleCaptionPaintDrawer = PaintUtil.createTextPaint(meterInfoCircleModel.getValueText());
 
     }
 
@@ -84,7 +84,7 @@ public class MeterInfoCircle{
         captionCenterX = x;
         captionCenterY = y;
 
-        str = meterInfoCircleModel.getCaptionText().getText();
+        str = "" + meterInfoCircleModel.getInfoCircleCurrentUnits();
         infoCircleCaptionPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
         textHeight = bounds.height();
         textWidth = bounds.width();

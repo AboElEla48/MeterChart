@@ -104,7 +104,9 @@ public class MainFragment extends Fragment implements MeterChartListener{
 
         // Init info circle of meter model
         MeterInfoCircleModel meterInfoCircleModel = new MeterInfoCircleModel();
-        meterInfoCircleModel.setCaptionText(new MeterText("16", 25, 0xff000000, 0xff000000, 0, true, false));
+        meterInfoCircleModel.setValueText(new MeterValueText(25, 0xff000000, 0xff000000, true, false));
+        meterInfoCircleModel.setInfoCircleMaxUnits(28);
+        meterInfoCircleModel.setInfoCircleCurrentUnits(16);
         meterInfoCircleModel.setDetailsText(new MeterText("16 Details", 20, 0xff000000, 0xff000000, 0, false, false));
         meterInfoCircleModel.setInfoCircleRadius(50f);
         meterInfoCircleModel.setInfoCircleDetailsRadius(80f);
