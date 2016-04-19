@@ -91,6 +91,13 @@ public class MeterBar {
 
         barY = y;
 
+        // Draw tooltip
+        if(meterBarModel.isTooltipVisible())
+        {
+            MeterBarTooltip meterBarTooltip = new MeterBarTooltip(meterBarModel.getTooltipModel());
+            meterBarTooltip.drawTooltip(canvas, (int)startX, (int)y, (int)barWidth);
+        }
+
         LogUtil.logBar(meterBarModel);
         LogUtil.logString("Canvas Height = " + canvas.getHeight());
         LogUtil.logString("Units = " + heightUnitPerPixel);

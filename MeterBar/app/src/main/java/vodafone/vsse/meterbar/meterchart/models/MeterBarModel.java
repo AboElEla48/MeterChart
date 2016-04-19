@@ -79,48 +79,49 @@ public class MeterBarModel {
 
     /**
      * set Tool tip flag appears in zero level
-     * @param isZeroTipVisible
+     * @param isTooltipVisible
      */
-    public void setIsZeroTipVisible(boolean isZeroTipVisible) {
-        this.isZeroTipVisible = isZeroTipVisible;
+    public void setIsTooltipVisible(boolean isTooltipVisible) {
+        this.isTooltipVisible = isTooltipVisible;
     }
 
     /**
      * flag to know if tip visible or not
      * @return
      */
-    public boolean isZeroTipVisible() {
-        return isZeroTipVisible;
+    public boolean isTooltipVisible() {
+        return isTooltipVisible;
     }
 
     /**
      * set tool tip appears in zero level
-     * @param zeroToolTip
+     * @param barTooltipModel
      */
-    public void setZeroToolTip(ToolTip zeroToolTip) {
-        this.zeroToolTip = zeroToolTip;
+    public void setTooltipModel(TooltipModel barTooltipModel) {
+        this.tooltipModel = barTooltipModel;
     }
 
     /**
      * get tool tip appears in zero level
      * @return
      */
-    public ToolTip getZeroToolTip() {
-        return zeroToolTip;
+    public TooltipModel getTooltipModel() {
+        return tooltipModel;
     }
 
+
     //unique ID for bar
-    int id;
+    private int id;
 
     // Hold list of chunks inside bar
-    List<MeterBarChunkModel> barChunks;
+    private List<MeterBarChunkModel> barChunks;
 
     // Hold the max value of bar
-    double barMaxValue = 0;
+    private double barMaxValue = 0;
 
     // Hold tip appears on bar
-    ToolTip zeroToolTip;
+    private TooltipModel tooltipModel;
 
     // On/Off flag for showing tip
-    boolean isZeroTipVisible;
+    private boolean isTooltipVisible = false;
 }

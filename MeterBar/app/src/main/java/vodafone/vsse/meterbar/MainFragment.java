@@ -20,6 +20,7 @@ import vodafone.vsse.meterbar.meterchart.models.MeterChartModel;
 import vodafone.vsse.meterbar.meterchart.models.MeterBarChunkModel;
 import vodafone.vsse.meterbar.meterchart.models.MeterText;
 import vodafone.vsse.meterbar.meterchart.models.MeterValueText;
+import vodafone.vsse.meterbar.meterchart.models.TooltipModel;
 import vodafone.vsse.meterbar.meterchart.views.MeterChart;
 
 
@@ -132,9 +133,6 @@ public class MainFragment extends Fragment implements MeterChartListener{
         //Create Red Bar
         MeterBarModel redMeterBar = new MeterBarModel();
         redMeterBar.setId(Red_Bar_ID);
-        redMeterBar.setIsZeroTipVisible(true);
-
-
         ArrayList<MeterBarChunkModel> redMeterChunks = new ArrayList<>();
 
         //Green Chunk
@@ -173,7 +171,6 @@ public class MainFragment extends Fragment implements MeterChartListener{
         //Create Yellow Bar
         MeterBarModel yellowMeterBar = new MeterBarModel();
         yellowMeterBar.setId(Yellow_Bar_ID);
-        yellowMeterBar.setIsZeroTipVisible(true);
         ArrayList<MeterBarChunkModel> yellowMeterChunks = new ArrayList<>();
 
 
@@ -298,6 +295,15 @@ public class MainFragment extends Fragment implements MeterChartListener{
                 meterChart.drawChartAnimated(Animation_Duration);
                 return true;
             }
+
+            case R.id.action_show_tips:
+            {
+                meterChart.setBarTooltipVisible(Red_Bar_ID,
+                        new TooltipModel(new MeterText(Red_Tip_Text, 25, 0xffffffff, 0, 0, false, false), 0xffEB5B22), true);
+                meterChart.setBarTooltipVisible(Yellow_Bar_ID,
+                        new TooltipModel(new MeterText(Yellow_Tip_Text, 25, 0xffffffff, 0, 0, false, false), 0xffF1C629), true);
+                return true;
+            }
         }
 
 
@@ -329,5 +335,9 @@ public class MainFragment extends Fragment implements MeterChartListener{
 
 
     private boolean drawAnimated = true;
+
+    private final String Red_Tip_Text = "This is the text of the tooltip of Red bar. It is somehow long text to show text wrapping. This can be extra";
+    private final String Yellow_Tip_Text = "This is the text of the tooltip of Yellow bar. It is somehow long text to show text wrapping. This can be extra";
+
 
 }

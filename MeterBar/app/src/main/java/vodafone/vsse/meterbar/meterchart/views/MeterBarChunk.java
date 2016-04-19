@@ -15,7 +15,8 @@ import vodafone.vsse.meterbar.meterchart.utils.PaintUtil;
  *
  * This layout is added on bar
  */
-public class MeterBarChunk {
+public class MeterBarChunk
+{
 
     /**
      * init chunk bar model

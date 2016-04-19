@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 import vodafone.vsse.meterbar.meterchart.models.MeterBarModel;
 import vodafone.vsse.meterbar.meterchart.models.MeterChartModel;
+import vodafone.vsse.meterbar.meterchart.models.TooltipModel;
 import vodafone.vsse.meterbar.meterchart.utils.LogUtil;
 import vodafone.vsse.meterbar.meterchart.utils.animation.AnimationListener;
 import vodafone.vsse.meterbar.meterchart.utils.animation.AnimationNotifier;
@@ -105,6 +106,46 @@ public class MeterChart extends View{
     public void setInfoCircleVisible(boolean isVisible)
     {
         meterChartModel.setIsCircleVisible(isVisible);
+        invalidate();
+    }
+
+    /**
+     * Show/hide tooltip on bar
+     * @param barID
+     * @param isVisible
+     */
+    public void setBarTooltipVisible(int barID, boolean isVisible)
+    {
+        for( MeterBarModel meterBarModel : meterChartModel.getMeterBars())
+        {
+            if(meterBarModel.getId() == barID)
+            {
+                meterBarModel.setIsTooltipVisible(isVisible);
+                break;
+            }
+        }
+
+        invalidate();
+    }
+
+    /**
+     * Show/hide tooltip on bar
+     * @param barID
+     * @param tooltipModel
+     * @param isVisible
+     */
+    public void setBarTooltipVisible(int barID, TooltipModel tooltipModel, boolean isVisible)
+    {
+        for( MeterBarModel meterBarModel : meterChartModel.getMeterBars())
+        {
+            if(meterBarModel.getId() == barID)
+            {
+                meterBarModel.setTooltipModel(tooltipModel);
+                meterBarModel.setIsTooltipVisible(isVisible);
+                break;
+            }
+        }
+
         invalidate();
     }
 

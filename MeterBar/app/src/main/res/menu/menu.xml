@@ -16,4 +16,9 @@
         android:id="@+id/action_zero"
         android:title="@string/action_zero"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_show_tips"
+        android:title="@string/action_show_tips"
+        app:showAsAction="never" />
 </menu>
