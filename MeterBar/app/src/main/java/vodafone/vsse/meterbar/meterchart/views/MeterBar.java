@@ -37,12 +37,11 @@ public class MeterBar {
      */
     public void drawBar(Canvas canvas, final float x, final float barWidth)
     {
-        this.canvas = canvas;
         startX = x;
         this.barWidth = barWidth;
 
         // draw chunks
-        drawChunks();
+        drawChunks(canvas);
 
     }
 
@@ -50,12 +49,44 @@ public class MeterBar {
      * Draw bar chunks
      *
      */
-    private void drawChunks()
+    private void drawChunks(Canvas canvas)
     {
         LogUtil.logString("Draw Chunks");
 
         double heightUnitPerPixel = (double)canvas.getHeight() / meterBarModel.getBarMaxValue();
-        float barHeight = (float) (meterBarModel.getChunksTotalValue() * heightUnitPerPixel);
+
+        // Adjust Chunks height according to min values
+        float barHeight = 0f;
+        chunksList = new ArrayList<>();
+        for(MeterBarChunkModel chunkModel : meterBarModel.getBarChunks())
+        {
+            MeterBarChunk chunk = new MeterBarChunk(chunkModel, meterChartListener);
+            float chunkHeight = (float) (chunkModel.getValue() * heightUnitPerPixel);
+
+            float chunkMinHeight = chunk.calculateMinHeight();
+            if(chunkHeight < chunkMinHeight)
+            {
+                if (chunkModel.getValue() == 0)
+                {
+                    chunk.setChunkDrawingMode(MeterBarChunk.Chunk_Mode_Zero);
+                }
+                else
+                {
+                    chunk.setChunkDrawingMode(MeterBarChunk.Chunk_Mode_Min);
+                }
+
+                // Add the min total value
+                barHeight += chunkMinHeight;
+            }
+            else
+            {
+                barHeight += chunkHeight;
+            }
+
+            chunksList.add(chunk);
+        }
+
+        // Calculate the start drawing y
         float y = canvas.getHeight() - barHeight;
 
         barY = y;
@@ -65,16 +96,29 @@ public class MeterBar {
         LogUtil.logString("Units = " + heightUnitPerPixel);
         LogUtil.logString("Bar Height = " + barHeight);
 
-        chunksList = new ArrayList<>();
-        for(MeterBarChunkModel chunkModel : meterBarModel.getBarChunks())
+        for(MeterBarChunk chunk : chunksList)
         {
-            MeterBarChunk chunk = new MeterBarChunk(chunkModel, meterChartListener);
-            float chunkHeight = (float) (chunkModel.getValue() * heightUnitPerPixel);
+            MeterBarChunkModel chunkModel = chunk.getMeterBarChunkModel();
+            float chunkHeight = 0;
+            switch (chunk.getChunkDrawingMode())
+            {
+                case MeterBarChunk.Chunk_Mode_Normal:
+                {
+                    chunkHeight = (float) (chunkModel.getValue() * heightUnitPerPixel);
+                    break;
+                }
+
+                case MeterBarChunk.Chunk_Mode_Min:
+                case MeterBarChunk.Chunk_Mode_Zero:
+                {
+                    float chunkMinHeight = chunk.calculateMinHeight();
+                    chunkHeight = chunkMinHeight;
+                    break;
+                }
+            }
 
             chunk.drawChunk(canvas, startX, barWidth, y, chunkHeight);
             y += chunkHeight;
-
-            chunksList.add(chunk);
         }
 
         barBottom = y;
@@ -130,7 +174,6 @@ public class MeterBar {
 
     // Hold the model of bar
     private MeterBarModel meterBarModel;
-    private Canvas canvas;
     private float startX;
     private float barWidth;
 

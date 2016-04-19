@@ -10,25 +10,16 @@ public class MeterValueText {
     public MeterValueText()
     {}
 
-    public MeterValueText(String font, int fontSize, int color, float margin,
+    public MeterValueText(int fontSize, int color, int zeroTextColor,
                           boolean isBold, boolean isItalic)
     {
-        setFontName(font);
         setFontSize(fontSize);
         setTextColor(color);
+        setZeroTextColor(zeroTextColor);
         setIsBold(isBold);
         setIsItalic(isItalic);
-        setMargin(margin);
     }
 
-
-    public void setFontName(String fontName) {
-        this.fontName = fontName;
-    }
-
-    public String getFontName() {
-        return fontName;
-    }
 
     public void setFontSize(int fontSize) {
         this.fontSize = fontSize;
@@ -44,6 +35,14 @@ public class MeterValueText {
 
     public int getTextColor() {
         return textColor;
+    }
+
+    public void setZeroTextColor(int zeroTextColor) {
+        this.zeroTextColor = zeroTextColor;
+    }
+
+    public int getZeroTextColor() {
+        return zeroTextColor;
     }
 
     public boolean isBold() {
@@ -72,7 +71,7 @@ public class MeterValueText {
 
     protected int fontSize = 0;
     protected int textColor = 0xff000000;
-    protected String fontName = "";
+    protected int zeroTextColor = 0xffff0000;
     protected boolean isBold = false;
     protected boolean isItalic = false;
     protected float margin;

@@ -11,7 +11,7 @@ public interface MeterChartListener {
      * Expose event that helper option in chunk is clicked
      * @param chunkID
      */
-    void chunkHelperClicked(int chunkID);
+    void chunkIconClicked(int chunkID);
 
     /**
      * Expose event that chunk bar is clicked

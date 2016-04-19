@@ -122,6 +122,28 @@ public class MeterChart extends View{
      */
     public void drawChartAnimated(int animationDuration)
     {
+        doChartAnimation(animationDuration);
+    }
+
+    /**
+     * Draw chart animated with given step
+     *
+     * @param animationDuration
+     * @param animationDownStep
+     */
+    public void drawChartAnimated(int animationDuration, int animationDownStep)
+    {
+        setAnimationStep(animationDownStep);
+
+        doChartAnimation(animationDuration);
+    }
+
+    /**
+     * Do chart animation
+     * @param animationDuration
+     */
+    private void doChartAnimation(int animationDuration)
+    {
         for(MeterBarModel meterBarModel : meterChartModel.getMeterBars()) {
             // Animate last chunk
             int size = meterBarModel.getBarChunks().size();
@@ -129,11 +151,12 @@ public class MeterChart extends View{
             meterBarModel.getBarChunks().get(size - 1).setValue(originalAnimationChunkValue +
                     meterBarModel.getBarMaxValue() - meterBarModel.getChunksTotalValue());
 
-            LogUtil.logString("Original Value of last chunk = " + originalAnimationChunkValue);
+            LogUtil.logString("##FF Original Value of last chunk = " + originalAnimationChunkValue);
 
             AnimationNotifier animationNotifier = new AnimationNotifier(animationDuration, new AnimationDownListener());
             animationNotifier.addAnimationTag(Animation_Bar_Model_Key, meterBarModel);
             animationNotifier.addAnimationTag(Animation_Original_Chunk_Val_Key, originalAnimationChunkValue);
+
             animationNotifier.startAnimation();
         }
     }
@@ -143,6 +166,27 @@ public class MeterChart extends View{
      * @param animationDuration
      */
     public void fillChart(int animationDuration)
+    {
+        doFillChart(animationDuration);
+    }
+
+    /**
+     * fill chart with given animation step
+     * @param animationDuration
+     * @param animationStep
+     */
+    public void fillChart(int animationDuration, int animationStep)
+    {
+        setAnimationStep(animationStep);
+
+        doFillChart(animationDuration);
+    }
+
+    /**
+     * Do fill animation
+     * @param animationDuration
+     */
+    private void doFillChart(int animationDuration)
     {
         for(MeterBarModel meterBarModel : meterChartModel.getMeterBars())
         {
@@ -155,6 +199,8 @@ public class MeterChart extends View{
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
+
+        LogUtil.logString("Canvas: " + canvas.getWidth() + ", " + canvas.getHeight());
 
         // Draw Chart bars
         drawBars(canvas);
@@ -264,13 +310,14 @@ public class MeterChart extends View{
             double originalAnimationChunkValue = ((Double)animationTags.get(Animation_Original_Chunk_Val_Key)).doubleValue();
 
             int size = meterBarModel.getBarChunks().size();
+            LogUtil.logString("##FF Value: " + meterBarModel.getBarChunks().get(size - 1).getValue());
             if(originalAnimationChunkValue >= meterBarModel.getBarChunks().get(size - 1).getValue())
             {
-                LogUtil.logString("Animation Finished");
+                LogUtil.logString("##FF Animation Finished");
                 return true;
             }
 
-            LogUtil.logString("Animation still running");
+            LogUtil.logString("##FF Animation still running");
             return false;
         }
 
@@ -284,13 +331,33 @@ public class MeterChart extends View{
             //Decrease animation step to redraw bar chunks
             int size = meterBarModel.getBarChunks().size();
             double currentVal = meterBarModel.getBarChunks().get(size - 1).getValue();
-            currentVal += Animation_Down_Step;
+
+            double originalAnimationChunkValue = ((Double)animationTags.get(Animation_Original_Chunk_Val_Key)).doubleValue();
+            if(currentVal + animationDownStep < originalAnimationChunkValue)
+            {
+                currentVal = originalAnimationChunkValue;
+            }
+            else
+            {
+                currentVal += animationDownStep;
+            }
 
             meterBarModel.getBarChunks().get(size - 1).setValue(currentVal);
 
             // Draw bar
             invalidate();
         }
+    }
+
+
+    public void setAnimationStep(int animationStep) {
+        this.animationStep = animationStep;
+
+        animationDownStep = -1 * animationStep;
+    }
+
+    public int getAnimationStep() {
+        return animationStep;
     }
 
     /**
@@ -312,13 +379,13 @@ public class MeterChart extends View{
             // Perform one step up
             MeterBarModel meterBarModel = (MeterBarModel) animationTags.get(Animation_Bar_Model_Key);
             double step;
-            if(meterBarModel.getChunksTotalValue() + Animation_Up_Step > meterBarModel.getBarMaxValue())
+            if(meterBarModel.getChunksTotalValue() + animationStep > meterBarModel.getBarMaxValue())
             {
                 step = meterBarModel.getBarMaxValue() - meterBarModel.getChunksTotalValue();
             }
             else
             {
-                step = Animation_Up_Step;
+                step = animationStep;
             }
 
             meterBarModel.getBarChunks().get(meterBarModel.getBarChunks().size() - 1).setValue(
@@ -330,8 +397,8 @@ public class MeterChart extends View{
         }
     }
 
-    private final int Animation_Down_Step = -100;
-    private final int Animation_Up_Step = 100;
+    private int animationStep = 100;
+    private int animationDownStep = -1 * animationStep;
 
     // Hold the model representing the data of the control
     private MeterChartModel meterChartModel;

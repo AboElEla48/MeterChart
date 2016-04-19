@@ -4,4 +4,8 @@
     <string name="redraw_btn">Redraw Chart</string>
     <string name="refill_btn">Refill Bars</string>
 
+    <string name="action_normal">Normal Mode</string>
+    <string name="action_min">Min Mode</string>
+    <string name="action_zero">Zero Mode</string>
+
 </resources>

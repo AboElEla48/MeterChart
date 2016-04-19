@@ -67,13 +67,14 @@ public class MeterInfoCircle{
         if(showDetails)
         {
             // Draw details circle
-            canvas.drawCircle(x, y, meterInfoCircleModel.getInfoCircleDetailsRadius(), infoCirclePaintDrawer);
+            canvas.drawCircle(x, y,
+                    meterInfoCircleModel.getInfoCircleDetailsRadius(), infoCirclePaintDrawer);
 
             str = meterInfoCircleModel.getDetailsText().getText();
             infoCircleDetailsPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
             textHeight = bounds.height();
             textWidth = bounds.width();
-            canvas.drawText(str, x - (textWidth / 2), y, infoCircleDetailsPaintDrawer);
+            canvas.drawText(str, x - (textWidth / 2), y + (textHeight/2), infoCircleDetailsPaintDrawer);
         }
 
         // Draw info circle
@@ -87,7 +88,7 @@ public class MeterInfoCircle{
         infoCircleCaptionPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
         textHeight = bounds.height();
         textWidth = bounds.width();
-        canvas.drawText(str, x - (textWidth / 2), y, infoCircleCaptionPaintDrawer);
+        canvas.drawText(str, x - (textWidth / 2), y + (textHeight/2), infoCircleCaptionPaintDrawer);
     }
 
     private float captionCenterX, captionCenterY;

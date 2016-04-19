@@ -5,7 +5,6 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Shader;
-
 import vodafone.vsse.meterbar.meterchart.listeners.MeterChartListener;
 import vodafone.vsse.meterbar.meterchart.models.MeterBarChunkModel;
 import vodafone.vsse.meterbar.meterchart.utils.LogUtil;
@@ -45,6 +44,10 @@ public class MeterBarChunk {
             barHelperPaintDrawer.setStyle(Paint.Style.FILL);
             barHelperPaintDrawer.setColor(meterBarChunkModel.getMeterBarChunkHelper().getHelperColor());
         }
+    }
+
+    public MeterBarChunkModel getMeterBarChunkModel() {
+        return meterBarChunkModel;
     }
 
     /**
@@ -87,7 +90,7 @@ public class MeterBarChunk {
         {
             if(meterChartListener != null)
             {
-                meterChartListener.chunkHelperClicked(meterBarChunkModel.getId());
+                meterChartListener.chunkIconClicked(meterBarChunkModel.getId());
             }
         }
         else
@@ -106,21 +109,28 @@ public class MeterBarChunk {
      * @param y
      * @param chunkHeight
      */
-    public void drawChunk(Canvas canvas, final float x, final float chunkWidth, final float y, final float chunkHeight)
+    public void drawChunk(Canvas canvas, float x, float chunkWidth, float y, float chunkHeight)
     {
-        // Draw chunk rectangle
+
+        /**
+         * Chunk is drawn in 3 modes
+         *
+         * Zero Mode in case the chunk value is zero
+         * Min Mode in case the value > 0 and height of bar is less than the smallest possible height of chunk
+         * Normal mode is the mode of drawing chunk relative to the height of the bar and value
+         */
 
 
-        float height = y + chunkHeight;
-        if(height > canvas.getHeight())
+        float actualChunkHeight = y + chunkHeight;
+        if (actualChunkHeight > canvas.getHeight())
         {
-            height = canvas.getHeight();
+            actualChunkHeight = canvas.getHeight();
         }
 
         chunkLeft = x;
         chunkRight = x + chunkWidth;
         chunkTop = y;
-        chunkBottom = height;
+        chunkBottom = actualChunkHeight;
 
         LogUtil.logString("Start Drawing chunk **");
         LogUtil.logString("x = " + x);
@@ -128,62 +138,144 @@ public class MeterBarChunk {
         LogUtil.logString("y = " + y);
         LogUtil.logString("Chunk Height = " + chunkHeight);
 
+        float halfImageHeight = 0;
+        if (meterBarChunkModel.isHelperVisible() && meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap() != null)
+        {
+            halfImageHeight = meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap().getHeight() / 2f;
+        }
 
         // Create shader for gradient
-        if(meterBarChunkModel.isGradientColor()) {
+        if (meterBarChunkModel.isGradientColor())
+        {
             Shader shader = new LinearGradient(chunkLeft, chunkTop, chunkRight, chunkBottom, meterBarChunkModel.getColorStartGradient(), meterBarChunkModel.getColorEndGradient(), Shader.TileMode.CLAMP);
             barPaintDrawer.setShader(shader);
         }
 
-        canvas.drawRect(x, y, x + chunkWidth, height, barPaintDrawer);
-
+        float margin;
         int textHeight, textWidth;
         Rect bounds = new Rect();
         String str;
 
-        str = meterBarChunkModel.getUpText().getText();
-        upTextPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
-        textHeight = bounds.height();
-        textWidth = bounds.width();
-        float margin = meterBarChunkModel.getUpText().getMargin();
-        canvas.drawText(str, x + (chunkWidth / 2) - (textWidth / 2), y + textHeight + margin, upTextPaintDrawer);
+        if(chunkDrawingMode == Chunk_Mode_Normal)
+        {
+            canvas.drawRect(x, y, chunkRight, chunkBottom, barPaintDrawer);
+        }
+        else
+        {
+            // Draw chunk rectangle
+            str = meterBarChunkModel.getMiddleText().getText();
+            middleTextPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
+            textHeight = bounds.height();
+            textWidth = bounds.width();
+
+            if(chunkDrawingMode == Chunk_Mode_Min)
+            {
+                canvas.drawRect(x, chunkBottom - textHeight - 20, chunkRight, chunkBottom, barPaintDrawer);
+            }
+
+            // Change the start point of chunk
+            y = chunkTop = chunkBottom - textHeight - 20;
+        }
+
+
+        // Draw up text
+        if(chunkDrawingMode == Chunk_Mode_Normal)
+        {
+            str = meterBarChunkModel.getUpText().getText();
+            upTextPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
+            textHeight = bounds.height();
+            textWidth = bounds.width();
+            margin = meterBarChunkModel.getUpText().getMargin();
+            canvas.drawText(str,
+                    x + (chunkWidth / 2) - (textWidth / 2),
+                    y + textHeight + margin + halfImageHeight,
+                    upTextPaintDrawer);
+        }
+
+        int valueTextHeight = 0;
 
         // Draw Value text
-        int valueTextHeight = 0;
-        if(meterBarChunkModel.getMeterValueText() != null)
+        if (meterBarChunkModel.getMeterValueText() != null)
         {
-            str = "" + (int)meterBarChunkModel.getValue();
+            str = "" + (int) meterBarChunkModel.getValue();
             valueTextPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
             valueTextHeight = bounds.height();
             textWidth = bounds.width();
 
-            canvas.drawText(str, x + (chunkWidth / 2) - (textWidth / 2), y + (chunkHeight / 2)- (textHeight/2), valueTextPaintDrawer);
+            if(chunkDrawingMode == Chunk_Mode_Normal)
+            {
+                canvas.drawText(str,
+                        x + (chunkWidth / 2) - (textWidth / 2),
+                        y + ( (chunkBottom - chunkTop) / 2) + (valueTextHeight / 2),
+                        valueTextPaintDrawer);
+            }
+            else
+            {
+
+                if(chunkDrawingMode == Chunk_Mode_Zero || chunkDrawingMode == Chunk_Mode_Min)
+                {
+                    valueTextPaintDrawer.setColor(meterBarChunkModel.getMeterValueText().getZeroTextColor());
+                }
+
+                // In min & zero modes draw text outside the rectangle
+                canvas.drawText(str,
+                        x + (chunkWidth / 2) - (textWidth / 2),
+                        y - valueTextMarginInMinMode,
+                        valueTextPaintDrawer);
+                LogUtil.logString("Value Text Height: " + valueTextHeight);
+            }
         }
 
+
         str = meterBarChunkModel.getMiddleText().getText();
+        if(chunkDrawingMode == Chunk_Mode_Zero)
+        {
+            middleTextPaintDrawer.setColor(meterBarChunkModel.getMiddleText().getZeroTextColor());
+        }
         middleTextPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
         textHeight = bounds.height();
         textWidth = bounds.width();
-        canvas.drawText(str, x + (chunkWidth / 2) - (textWidth / 2), y + (chunkHeight / 2)- (textHeight/2) + valueTextHeight, middleTextPaintDrawer);
+        canvas.drawText(str,
+                x + (chunkWidth / 2) - (textWidth / 2),
+                y + ( (chunkBottom - chunkTop) / 2) + (textHeight / 2) + (chunkDrawingMode == Chunk_Mode_Normal ? valueTextHeight : 0),
+                middleTextPaintDrawer);
 
-        str = meterBarChunkModel.getDownText().getText();
-        downTextPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
-        textHeight = bounds.height();
-        textWidth = bounds.width();
-        margin = meterBarChunkModel.getDownText().getMargin();
-        canvas.drawText(str, x + (chunkWidth / 2) - (textWidth / 2), y + chunkHeight - textHeight - margin, downTextPaintDrawer);
+        if(chunkDrawingMode == Chunk_Mode_Normal)
+        {
+            str = meterBarChunkModel.getDownText().getText();
+            downTextPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
+            textHeight = bounds.height();
+            textWidth = bounds.width();
+            margin = meterBarChunkModel.getDownText().getMargin();
+            canvas.drawText(str,
+                    x + (chunkWidth / 2) - (textWidth / 2),
+                    y + chunkHeight - textHeight - margin,
+                    downTextPaintDrawer);
+        }
 
         // Draw helper
-        if(meterBarChunkModel.isHelperVisible() && meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap() != null)
+        if (meterBarChunkModel.isHelperVisible() && meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap() != null)
         {
-            bitmapLeft = x + (chunkWidth/2) - (meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap().getWidth()/2);
-            bitmapTop = y - (meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap().getHeight()/2);
+            bitmapLeft = x + (chunkWidth / 2) - (meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap().getWidth() / 2);
+            bitmapTop = y - (meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap().getHeight() / 2);
             bitmapRight = bitmapLeft + meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap().getWidth();
             bitmapBottom = bitmapTop + meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap().getHeight();
 
+            if(chunkDrawingMode == Chunk_Mode_Min || chunkDrawingMode == Chunk_Mode_Zero)
+            {
+                // In zero and min modes, draw helper outside rectangle
+                bitmapTop -= valueTextHeight;
+                bitmapTop -= circleMarginInMinMode;
+                bitmapTop -= (meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap().getHeight() / 2);
+
+                bitmapBottom -= valueTextHeight;
+                bitmapBottom -= circleMarginInMinMode;
+                bitmapBottom -= (meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap().getHeight() / 2);
+            }
+
             // Fill color that appears as background for helper option
-            canvas.drawCircle(bitmapLeft + ( (bitmapRight - bitmapLeft) / 2),
-                    bitmapTop + ( (bitmapBottom - bitmapTop) / 2), meterBarChunkModel.getMeterBarChunkHelper().getHotAreaRadius(), barHelperPaintDrawer);
+            canvas.drawCircle(bitmapLeft + ((bitmapRight - bitmapLeft) / 2),
+                    bitmapTop + ((bitmapBottom - bitmapTop) / 2), meterBarChunkModel.getMeterBarChunkHelper().getHotAreaRadius(), barHelperPaintDrawer);
 
             // draw image of helper option
             canvas.drawBitmap(meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap(), bitmapLeft, bitmapTop, null);
@@ -193,6 +285,65 @@ public class MeterBarChunk {
         LogUtil.logString("Chunk Drawn");
     }
 
+
+
+    /**
+     * calculate the min height of view
+     *
+     * @return
+     */
+    public float calculateMinHeight()
+    {
+        float minHeight = 0f;
+
+        if(meterBarChunkModel.isHelperVisible())
+        {
+            // calculate the half height of the helper option. It is drawn inside th ebar
+            minHeight += (float)meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap().getHeight();
+        }
+
+        String str;
+        Rect bounds = new Rect();
+
+        // Calculate the height of the up text
+        str = meterBarChunkModel.getDownText().getText();
+        if(str.length() > 0) {
+            upTextPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
+            minHeight += bounds.height() + meterBarChunkModel.getUpText().getMargin();
+        }
+
+        // Calculate the height of the Value text
+        str = "" + (int) meterBarChunkModel.getValue();
+        if(meterBarChunkModel.getMeterValueText() != null) {
+            valueTextPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
+            minHeight += bounds.height();
+        }
+
+        // Calculate the height of the Middle text
+        str = meterBarChunkModel.getMiddleText().getText();
+        if(str.length() > 0) {
+            middleTextPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
+            minHeight += bounds.height() + meterBarChunkModel.getMiddleText().getMargin();
+        }
+
+        // Calculate the height of the Down text
+        str = meterBarChunkModel.getDownText().getText();
+        if(str.length() > 0) {
+            downTextPaintDrawer.getTextBounds(str, 0, str.length(), bounds);
+            minHeight += bounds.height() + meterBarChunkModel.getDownText().getMargin();
+        }
+
+        return minHeight;
+    }
+
+    public void setChunkDrawingMode(int mode)
+    {
+        chunkDrawingMode = mode;
+    }
+
+    public int getChunkDrawingMode() {
+        return chunkDrawingMode;
+    }
 
     private MeterBarChunkModel meterBarChunkModel;
 
@@ -211,4 +362,12 @@ public class MeterBarChunk {
     private MeterChartListener meterChartListener;
 
 
+    //Define the drawing mode
+    public final static int Chunk_Mode_Normal = 0;
+    public final static int Chunk_Mode_Zero = 1;
+    public final static int Chunk_Mode_Min = 2;
+    private int chunkDrawingMode = Chunk_Mode_Normal;
+
+    private final int valueTextMarginInMinMode =  10;
+    private final int circleMarginInMinMode = valueTextMarginInMinMode + 10;
 }

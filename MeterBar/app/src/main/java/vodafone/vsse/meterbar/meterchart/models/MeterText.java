@@ -14,10 +14,11 @@ public class MeterText extends MeterValueText{
         super();
     }
 
-    public MeterText(String text, String font, int fontSize, int color, float margin,
+    public MeterText(String text, int fontSize, int color, int zeroTextColor, float margin,
                      boolean isBold, boolean isItalic)
     {
-        super(font, fontSize, color, margin, isBold, isItalic);
+        super(fontSize, color, zeroTextColor, isBold, isItalic);
+        setMargin(margin);
         setText(text);
     }
 
