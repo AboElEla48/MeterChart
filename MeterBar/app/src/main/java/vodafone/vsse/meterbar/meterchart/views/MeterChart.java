@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -12,16 +13,17 @@ import vodafone.vsse.meterbar.meterchart.models.MeterBarModel;
 import vodafone.vsse.meterbar.meterchart.models.MeterChartModel;
 import vodafone.vsse.meterbar.meterchart.models.MeterInfoCircleModel;
 import vodafone.vsse.meterbar.meterchart.models.TooltipModel;
-import vodafone.vsse.meterbar.meterchart.utils.LogUtil;
+import vodafone.vsse.meterbar.meterchart.utils.PaintUtil;
 import vodafone.vsse.meterbar.meterchart.utils.animation.AnimationListener;
 import vodafone.vsse.meterbar.meterchart.utils.animation.AnimationNotifier;
 
 /**
  * Created by AboElEla on 3/24/2016.
- *
+ * <p/>
  * This custom control will draw the column chart according to given columns data
  */
-public class MeterChart extends View{
+public class MeterChart extends View
+{
 
     public MeterChart(Context context)
     {
@@ -40,27 +42,42 @@ public class MeterChart extends View{
      */
     private void initView()
     {
-        setOnTouchListener(new OnTouchListener() {
+        setOnTouchListener(new OnTouchListener()
+        {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public boolean onTouch(View v, MotionEvent event)
+            {
 
                 float x = event.getX();
                 float y = event.getY();
 
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN: {
+                switch (event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                    {
                         // Check if the click on circle info caption
-                        if (isCircleVisible() && infoCircle.isTouchEventInCircleInfo(x, y)) {
-                            LogUtil.logString("Circle consumed Touch event");
+                        if (isCircleVisible() && infoCircle.isTouchEventInCircleInfo(x, y))
+                        {
                             isCircleClicked = true;
                             invalidate();
-                        } else {
-                            LogUtil.logString("Touch: should move to bars");
+                        }
+                        else if (meterChartModel.isChartHandleVisible() && isTouchEventInChartHandle(x, y))
+                        {
+                            //Notify listener that user clicked chart handle to move chart
+                            if(meterChartModel.getMeterChartListener() != null)
+                            {
+                                meterChartModel.getMeterChartListener().chartHandleClicked();
+                            }
+                            break;
+                        }
+                        else
+                        {
 
                             // Check if the click on one of the bars
-                            for (int i = 0; i < barsList.size(); i++) {
-                                if (barsList.get(i).isTouchEventInBar(x, y)) {
-                                    LogUtil.logString("Touch: bar found");
+                            for (int i = 0; i < barsList.size(); i++)
+                            {
+                                if (barsList.get(i).isTouchEventInBar(x, y))
+                                {
 
                                     // point inside bar
                                     barsList.get(i).onTouchEvent(x, y);
@@ -68,15 +85,15 @@ public class MeterChart extends View{
                                 }
                             }
 
-                            LogUtil.logString("Touch: event down finished");
-
                         }
 
                         return true;
                     }
 
-                    case MotionEvent.ACTION_UP: {
-                        if (isCircleClicked) {
+                    case MotionEvent.ACTION_UP:
+                    {
+                        if (isCircleClicked)
+                        {
                             isCircleClicked = false;
                             invalidate();
                         }
@@ -102,6 +119,7 @@ public class MeterChart extends View{
 
     /**
      * Control the visibility of info circle
+     *
      * @param isVisible flag to show/hide info circle
      */
     public void setInfoCircleVisible(boolean isVisible)
@@ -112,14 +130,15 @@ public class MeterChart extends View{
 
     /**
      * Show/hide tooltip on bar
+     *
      * @param barID
      * @param isVisible
      */
     public void setBarTooltipVisible(int barID, boolean isVisible)
     {
-        for( MeterBarModel meterBarModel : meterChartModel.getMeterBars())
+        for (MeterBarModel meterBarModel : meterChartModel.getMeterBars())
         {
-            if(meterBarModel.getId() == barID)
+            if (meterBarModel.getId() == barID)
             {
                 meterBarModel.setIsTooltipVisible(isVisible);
                 break;
@@ -131,15 +150,16 @@ public class MeterChart extends View{
 
     /**
      * Show/hide tooltip on bar
+     *
      * @param barID
      * @param tooltipModel
      * @param isVisible
      */
     public void setBarTooltipVisible(int barID, TooltipModel tooltipModel, boolean isVisible)
     {
-        for( MeterBarModel meterBarModel : meterChartModel.getMeterBars())
+        for (MeterBarModel meterBarModel : meterChartModel.getMeterBars())
         {
-            if(meterBarModel.getId() == barID)
+            if (meterBarModel.getId() == barID)
             {
                 meterBarModel.setTooltipModel(tooltipModel);
                 meterBarModel.setIsTooltipVisible(isVisible);
@@ -152,6 +172,7 @@ public class MeterChart extends View{
 
     /**
      * Check if circle info is visible or not
+     *
      * @return
      */
     public boolean isCircleVisible()
@@ -182,11 +203,12 @@ public class MeterChart extends View{
 
     /**
      * Do chart animation
+     *
      * @param animationDuration
      */
     private void doChartAnimation(int animationDuration)
     {
-        if(meterChartModel.isCircleVisible())
+        if (meterChartModel.isCircleVisible())
         {
             // Animate info circle
             int originalAnimationCircleValue = meterChartModel.getInfoCircleModel().getInfoCircleCurrentUnits();
@@ -198,14 +220,13 @@ public class MeterChart extends View{
             animationNotifier.startAnimation();
         }
 
-        for(MeterBarModel meterBarModel : meterChartModel.getMeterBars()) {
+        for (MeterBarModel meterBarModel : meterChartModel.getMeterBars())
+        {
             // Animate last chunk
             int size = meterBarModel.getBarChunks().size();
             double originalAnimationChunkValue = meterBarModel.getBarChunks().get(size - 1).getValue();
             meterBarModel.getBarChunks().get(size - 1).setValue(originalAnimationChunkValue +
                     meterBarModel.getBarMaxValue() - meterBarModel.getChunksTotalValue());
-
-            LogUtil.logString("##FF Original Value of last chunk = " + originalAnimationChunkValue);
 
             AnimationNotifier animationNotifier = new AnimationNotifier(animationDuration, new AnimationDownListener());
             animationNotifier.addAnimationTag(Animation_Bar_Model_Key, meterBarModel);
@@ -217,6 +238,7 @@ public class MeterChart extends View{
 
     /**
      * Fill bars of chart
+     *
      * @param animationDuration
      */
     public void fillChart(int animationDuration)
@@ -226,6 +248,7 @@ public class MeterChart extends View{
 
     /**
      * fill chart with given animation step
+     *
      * @param animationDuration
      * @param animationStep
      */
@@ -238,11 +261,12 @@ public class MeterChart extends View{
 
     /**
      * Do fill animation
+     *
      * @param animationDuration
      */
     private void doFillChart(int animationDuration)
     {
-        for(MeterBarModel meterBarModel : meterChartModel.getMeterBars())
+        for (MeterBarModel meterBarModel : meterChartModel.getMeterBars())
         {
             AnimationNotifier animationNotifier = new AnimationNotifier(animationDuration, new AnimationUpListener());
             animationNotifier.addAnimationTag(Animation_Bar_Model_Key, meterBarModel);
@@ -251,20 +275,23 @@ public class MeterChart extends View{
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(Canvas canvas)
+    {
         super.draw(canvas);
-
-        LogUtil.logString("Canvas: " + canvas.getWidth() + ", " + canvas.getHeight());
 
         // Draw Chart bars
         drawBars(canvas);
 
         // Draw chart circles
         drawCircle(canvas);
+
+        // Draw chart handle image
+        drawHandle(canvas);
     }
 
     /**
      * Draw bars
+     *
      * @param canvas
      */
     private void drawBars(Canvas canvas)
@@ -278,14 +305,14 @@ public class MeterChart extends View{
         // Draw chart views
 
         // Draw bars
-        double barWidth = (double)chartWidth / (double)numOfBars - (meterChartModel.getBarsMargin() * (numOfBars-1));
+        double barWidth = (double) chartWidth / (double) numOfBars - (meterChartModel.getBarsMargin() * (numOfBars - 1));
         float x = 0f;
         float y = 0f;
         barsList = new ArrayList<>();
-        for(MeterBarModel barModel : meterChartModel.getMeterBars())
+        for (MeterBarModel barModel : meterChartModel.getMeterBars())
         {
             MeterBar meterBar = new MeterBar(barModel, meterChartModel.getMeterChartListener());
-            meterBar.drawBar(canvas, x, (float)barWidth);
+            meterBar.drawBar(canvas, x, (float) barWidth);
             x += barWidth + meterChartModel.getBarsMargin();
 
             barsList.add(meterBar);
@@ -294,11 +321,12 @@ public class MeterChart extends View{
 
     /**
      * Draw chunks
+     *
      * @param canvas
      */
     private void drawCircle(Canvas canvas)
     {
-        if(meterChartModel.isCircleVisible())
+        if (meterChartModel.isCircleVisible())
         {
             // get the dimensions of view
             int chartWidth = getWidth();
@@ -316,16 +344,51 @@ public class MeterChart extends View{
     }
 
     /**
+     * Draw the chart handle
+     *
+     * @param canvas
+     */
+    private void drawHandle(Canvas canvas)
+    {
+        if (meterChartModel.isChartHandleVisible())
+        {
+            // get the dimensions of view
+            int chartWidth = getWidth();
+            int chartHeight = getHeight();
+
+            handleChartLeft = (chartWidth / 2) - (meterChartModel.getChartHandle().getWidth() / 2);
+            handleChartTop = chartHeight - meterChartModel.getChartHandle().getHeight() - meterChartModel.getChartHandleMargin();
+
+            handleChartRight = handleChartLeft + meterChartModel.getChartHandle().getWidth();
+            handleChartBottom = handleChartTop + meterChartModel.getChartHandle().getHeight();
+
+            // draw bitmap handle
+            canvas.drawBitmap(meterChartModel.getChartHandle(), handleChartLeft, handleChartTop, null);
+        }
+    }
+
+    /**
+     * Check if event touch on chart handle or not
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    private boolean isTouchEventInChartHandle(float x, float y)
+    {
+        return PaintUtil.isPointInsideRect(x, y, handleChartLeft, handleChartTop, handleChartRight, handleChartBottom);
+    }
+
+    /**
      * Define listener for Circle animation
      */
-    private class AnimationCircleDownListener implements  AnimationListener
+    private class AnimationCircleDownListener implements AnimationListener
     {
-
         @Override
         public boolean isAnimationFinished(HashMap<String, Object> animationTags)
         {
-            int originalCircleValue = ((Integer)animationTags.get(Animation_Original_Circle_Val_Key)).intValue();
-            if(originalCircleValue < meterChartModel.getInfoCircleModel().getInfoCircleCurrentUnits())
+            int originalCircleValue = ((Integer) animationTags.get(Animation_Original_Circle_Val_Key)).intValue();
+            if (originalCircleValue < meterChartModel.getInfoCircleModel().getInfoCircleCurrentUnits())
             {
                 return false;
             }
@@ -348,36 +411,33 @@ public class MeterChart extends View{
     private class AnimationDownListener implements AnimationListener
     {
         @Override
-        public boolean isAnimationFinished(HashMap<String, Object> animationTags) {
+        public boolean isAnimationFinished(HashMap<String, Object> animationTags)
+        {
 
             MeterBarModel meterBarModel = (MeterBarModel) animationTags.get(Animation_Bar_Model_Key);
-            double originalAnimationChunkValue = ((Double)animationTags.get(Animation_Original_Chunk_Val_Key)).doubleValue();
+            double originalAnimationChunkValue = ((Double) animationTags.get(Animation_Original_Chunk_Val_Key)).doubleValue();
 
             int size = meterBarModel.getBarChunks().size();
-            LogUtil.logString("##FF Value: " + meterBarModel.getBarChunks().get(size - 1).getValue());
-            if(originalAnimationChunkValue >= meterBarModel.getBarChunks().get(size - 1).getValue())
+            if (originalAnimationChunkValue >= meterBarModel.getBarChunks().get(size - 1).getValue())
             {
-                LogUtil.logString("##FF Animation Finished");
                 return true;
             }
 
-            LogUtil.logString("##FF Animation still running");
             return false;
         }
 
         @Override
-        public void notifyAnimationStep(HashMap<String, Object> animationTags) {
+        public void notifyAnimationStep(HashMap<String, Object> animationTags)
+        {
 
             MeterBarModel meterBarModel = (MeterBarModel) animationTags.get(Animation_Bar_Model_Key);
-
-            LogUtil.logString("Animation Step");
 
             //Decrease animation step to redraw bar chunks
             int size = meterBarModel.getBarChunks().size();
             double currentVal = meterBarModel.getBarChunks().get(size - 1).getValue();
 
-            double originalAnimationChunkValue = ((Double)animationTags.get(Animation_Original_Chunk_Val_Key)).doubleValue();
-            if(currentVal + animationDownStep < originalAnimationChunkValue)
+            double originalAnimationChunkValue = ((Double) animationTags.get(Animation_Original_Chunk_Val_Key)).doubleValue();
+            if (currentVal + animationDownStep < originalAnimationChunkValue)
             {
                 currentVal = originalAnimationChunkValue;
             }
@@ -394,13 +454,15 @@ public class MeterChart extends View{
     }
 
 
-    public void setAnimationStep(int animationStep) {
+    public void setAnimationStep(int animationStep)
+    {
         this.animationStep = animationStep;
 
         animationDownStep = -1 * animationStep;
     }
 
-    public int getAnimationStep() {
+    public int getAnimationStep()
+    {
         return animationStep;
     }
 
@@ -411,19 +473,21 @@ public class MeterChart extends View{
     {
 
         @Override
-        public boolean isAnimationFinished(HashMap<String, Object> animationTags) {
+        public boolean isAnimationFinished(HashMap<String, Object> animationTags)
+        {
             // Check if meter reached the max value
             MeterBarModel meterBarModel = (MeterBarModel) animationTags.get(Animation_Bar_Model_Key);
             return meterBarModel.getChunksTotalValue() >= meterBarModel.getBarMaxValue();
         }
 
         @Override
-        public void notifyAnimationStep(HashMap<String, Object> animationTags) {
+        public void notifyAnimationStep(HashMap<String, Object> animationTags)
+        {
 
             // Perform one step up
             MeterBarModel meterBarModel = (MeterBarModel) animationTags.get(Animation_Bar_Model_Key);
             double step;
-            if(meterBarModel.getChunksTotalValue() + animationStep > meterBarModel.getBarMaxValue())
+            if (meterBarModel.getChunksTotalValue() + animationStep > meterBarModel.getBarMaxValue())
             {
                 step = meterBarModel.getBarMaxValue() - meterBarModel.getChunksTotalValue();
             }
@@ -441,6 +505,8 @@ public class MeterChart extends View{
         }
     }
 
+    private final String LOG_TAG = "Meter_Chart_Log";
+
     private int animationStep = 100;
     private int animationDownStep = -1 * animationStep;
 
@@ -449,7 +515,13 @@ public class MeterChart extends View{
     private MeterInfoCircle infoCircle;
     private boolean isCircleClicked = false;
 
+    // Hold list of bars drawn
     private ArrayList<MeterBar> barsList;
+
+    private float handleChartLeft;
+    private float handleChartTop;
+    private float handleChartRight;
+    private float handleChartBottom;
 
     private final String Animation_Bar_Model_Key = "Animation_Bar_Model_Key";
     private final String Animation_Original_Chunk_Val_Key = "Animation_Original_Chunk_Val_Key";

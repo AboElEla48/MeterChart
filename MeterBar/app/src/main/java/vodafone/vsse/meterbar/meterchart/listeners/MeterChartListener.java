@@ -18,4 +18,9 @@ public interface MeterChartListener {
      * @param chunkID
      */
     void chunkBarClicked(int chunkID);
+
+    /**
+     * Expose event that chart handle image is clicked to move chart
+     */
+    void chartHandleClicked();
 }

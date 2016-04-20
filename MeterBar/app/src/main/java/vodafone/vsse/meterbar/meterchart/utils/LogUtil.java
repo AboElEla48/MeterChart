@@ -1,60 +1,159 @@
+/**
+ * 
+ */
 package vodafone.vsse.meterbar.meterchart.utils;
+
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import android.util.Log;
 
-import vodafone.vsse.meterbar.meterchart.models.MeterBarChunkModel;
-import vodafone.vsse.meterbar.meterchart.models.MeterBarModel;
-
 /**
- * Created by AboElEla on 4/1/2016.
+ * @author ahmed
+ * 
  */
-public class LogUtil {
+public class LogUtil
+{
+	/**
+	 * Write debug message
+	 * 
+	 * @param logTag
+	 * @param logMessage
+	 */
+	public static void writeDebugLog(String logTag, String logMessage)
+	{
+		if (mUseDebugLog)
+		{
+			Log.d("" + logTag, "" + logMessage);
+		}
+
+		if (mUseFileLog)
+		{
+			writeToFile(logTag, logMessage);
+		}
+	}
+
+	/**
+	 * Write Error message
+	 * 
+	 * @param logTag
+	 * @param logMessage
+	 */
+	public static void writeErrorLog(String logTag, String logMessage)
+	{
+		if (mUseErrorLog)
+		{
+			Log.e("" + logTag, "" + logMessage);
+		}
+
+		if (mUseFileLog)
+		{
+			writeToFile(logTag, logMessage);
+		}
+	}
 
     /**
-     * Log Bar
-     * @param meterBarModel
+     * Log error exception
+     * @param logTag
+     * @param ex
      */
-    public static void logBar(MeterBarModel meterBarModel)
+    public static void writeErrorLog(String logTag, Exception ex)
     {
-        if(isLogEnabled)
+        ex.printStackTrace();
+
+        if (mUseErrorLog)
         {
-            Log.d(LOG_TAG, "------Bar Values-----");
-            Log.d(LOG_TAG, "Bar ID = " + meterBarModel.getId());
-            Log.d(LOG_TAG, "Bar Chunks Total Value = " + meterBarModel.getChunksTotalValue());
-            Log.d(LOG_TAG, "Bar Max Value = " + meterBarModel.getBarMaxValue());
-            Log.d(LOG_TAG, "---------------------");
+            Log.e("" + logTag, "Exception Message: " + ex.getMessage());
+        }
+
+        if (mUseFileLog)
+        {
+            writeToFile(logTag, ex.getMessage());
         }
     }
 
-    /**
-     * Log Chunk
-     * @param meterBarChunkModel
-     */
-    public static void logChunk(MeterBarChunkModel meterBarChunkModel)
-    {
-        if(isLogEnabled)
-        {
-            Log.d(LOG_TAG, "------Chunk Values-----");
-            Log.d(LOG_TAG, "Chunk ID = " + meterBarChunkModel.getId());
-            Log.d(LOG_TAG, "Chunk Up Text = " + meterBarChunkModel.getUpText());
-            Log.d(LOG_TAG, "Chunk Middle Text = " + meterBarChunkModel.getMiddleText());
-            Log.d(LOG_TAG, "Chunk Down Text = " + meterBarChunkModel.getDownText());
-            Log.d(LOG_TAG, "-----------------------");
-        }
-    }
+	/**
+	 * Write Warning message
+	 * 
+	 * @param logTag
+	 * @param logMessage
+	 */
+	public static void writeWarningLog(String logTag, String logMessage)
+	{
+		if (mUseErrorLog)
+		{
+			Log.w("" + logTag, "" + logMessage);
+		}
 
-    /**
-     * Log given string
-     * @param str
-     */
-    public static void logString(String str)
-    {
-        if(isLogEnabled)
-        {
-            Log.d(LOG_TAG, str);
-        }
-    }
+		if (mUseFileLog)
+		{
+			writeToFile(logTag, logMessage);
+		}
+	}
 
-    public final static boolean isLogEnabled = true;
-    public final static String LOG_TAG = "Meter_Chart_Log";
+	/**
+	 * Write Info message
+	 * 
+	 * @param logTag
+	 * @param logMessage
+	 */
+	public static void writeInfoLog(String logTag, String logMessage)
+	{
+		if (mUseInfoLog)
+		{
+			Log.i("" + logTag, "" + logMessage);
+		}
+		
+		if (mUseFileLog)
+		{
+			writeToFile(logTag, logMessage);
+		}
+	}
+
+	/**
+	 * Write given log to log file stream
+	 * 
+	 * @param logTag
+	 * @param logMessage
+	 */
+	private static void writeToFile(String logTag, String logMessage)
+	{
+		// Check the existence of external storage for log
+		if (SystemUtil.isExternalStorageExists())
+		{
+			// get the full path of log file
+			String logFileFullPath = SystemUtil.getFullPathOfFileOnExternalStorage(Log_File_Path);
+
+			try
+			{
+				FileOutputStream fileOut = new FileOutputStream(logFileFullPath, true);
+				DataOutputStream outStream = new DataOutputStream(fileOut);
+
+				// write log line
+				outStream.writeBytes(DateUtil.getNowDateTimeFormatted() + ":\t" + logTag + "\t\t\t" + logMessage);
+
+				// write log separation
+				outStream.writeBytes("\n");
+
+				// close stream
+				fileOut.close();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+
+		}
+
+	}
+
+	// Define compile time flag to enable/disable log on files
+	private final static boolean mUseFileLog = false;
+	private final static boolean mUseDebugLog = true;
+	private final static boolean mUseErrorLog = true;
+	private final static boolean mUseInfoLog = true;
+
+	// Define the name of log file
+	private final static String Log_File_Path = "Util_log.txt";
 }

@@ -1,5 +1,6 @@
 package vodafone.vsse.meterbar.meterchart.models;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 import java.util.List;
@@ -54,8 +55,39 @@ public class MeterChartModel {
         this.meterChartListener = meterChartListener;
     }
 
+    public void setChartHandle(Bitmap handleImage, int chartHandleMargin, boolean isVisible)
+    {
+        this.chartHandle = handleImage;
+        this.chartHandleMargin = chartHandleMargin;
+
+        setChartHandleVisible(isVisible);
+    }
+
+    public int getChartHandleMargin()
+    {
+        return chartHandleMargin;
+    }
+
+    public Bitmap getChartHandle()
+    {
+        return chartHandle;
+    }
+
+    public void setChartHandleVisible(boolean isVisible)
+    {
+        isChartHandleVisible = isVisible;
+    }
+
+    public boolean isChartHandleVisible()
+    {
+        return isChartHandleVisible;
+    }
+
     // Hold model for info circle
     MeterInfoCircleModel infoCircleModel = new MeterInfoCircleModel();
+
+    // Define if the circle info is visible or not
+    private boolean isCircleVisible;
 
     // Hold list of chart bars
     List<MeterBarModel> meterBars;
@@ -63,11 +95,14 @@ public class MeterChartModel {
     // Define the margin between bars
     private int barsMargin;
 
-    // Define if the circle info is visible or not
-    private boolean isCircleVisible;
+    // Hold bitmap of the handler
+    private Bitmap chartHandle;
 
-    // Hold the drawable of holder that is user to move the bar
-    Drawable meterHolderDrawable;
+    // Define the down margin of the handle
+    private int chartHandleMargin = 10;
+
+    // Define flag to show/hide chart handle image
+    private boolean isChartHandleVisible = false;
 
     // Hold listener to chart
     private MeterChartListener meterChartListener;

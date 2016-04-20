@@ -7,7 +7,6 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import vodafone.vsse.meterbar.meterchart.listeners.MeterChartListener;
 import vodafone.vsse.meterbar.meterchart.models.MeterBarChunkModel;
-import vodafone.vsse.meterbar.meterchart.utils.LogUtil;
 import vodafone.vsse.meterbar.meterchart.utils.PaintUtil;
 
 /**
@@ -133,11 +132,6 @@ public class MeterBarChunk
         chunkTop = y;
         chunkBottom = actualChunkHeight;
 
-        LogUtil.logString("Start Drawing chunk **");
-        LogUtil.logString("x = " + x);
-        LogUtil.logString("Chunk Width = " + chunkWidth);
-        LogUtil.logString("y = " + y);
-        LogUtil.logString("Chunk Height = " + chunkHeight);
 
         float halfImageHeight = 0;
         if (meterBarChunkModel.isHelperVisible() && meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap() != null)
@@ -223,7 +217,6 @@ public class MeterBarChunk
                         x + (chunkWidth / 2) - (textWidth / 2),
                         y - valueTextMarginInMinMode,
                         valueTextPaintDrawer);
-                LogUtil.logString("Value Text Height: " + valueTextHeight);
             }
         }
 
@@ -282,8 +275,6 @@ public class MeterBarChunk
             canvas.drawBitmap(meterBarChunkModel.getMeterBarChunkHelper().getHelperBitmap(), bitmapLeft, bitmapTop, null);
         }
 
-
-        LogUtil.logString("Chunk Drawn");
     }
 
 

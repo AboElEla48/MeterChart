@@ -102,6 +102,13 @@ public class MainFragment extends Fragment implements MeterChartListener{
     {
         MeterChartModel meterChartModel = new MeterChartModel();
 
+        // Load Handle image of chart
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        //options.inScaled = false;
+        Bitmap handleBitmap = BitmapFactory.decodeResource(getContext().getResources(),
+                R.drawable.handle, options);
+        meterChartModel.setChartHandle(handleBitmap, 20, true);
+
         // Init info circle of meter model
         MeterInfoCircleModel meterInfoCircleModel = new MeterInfoCircleModel();
         meterInfoCircleModel.setValueText(new MeterValueText(25, 0xff000000, 0xff000000, true, false));
@@ -115,7 +122,7 @@ public class MainFragment extends Fragment implements MeterChartListener{
         meterChartModel.setInfoCircleModel(meterInfoCircleModel);
         meterChartModel.setIsCircleVisible(true);
 
-
+        // set margin among bars
         meterChartModel.setBarsMargin(10);
 
         //set meter bars to meter model
@@ -123,7 +130,7 @@ public class MainFragment extends Fragment implements MeterChartListener{
 
         // Init Bars of meter model
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
+        options = new BitmapFactory.Options();
         //options.inScaled = false;
         Bitmap helperBitmap = BitmapFactory.decodeResource(getContext().getResources(),
                 R.drawable.plus_shadow, options);
@@ -228,6 +235,13 @@ public class MainFragment extends Fragment implements MeterChartListener{
         String text = "(Helper) %s option is clicked";
         String chunkName = mapChunkToName(chunkID);
         Snackbar.make(this.getView(), String.format(text, chunkName), Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void chartHandleClicked()
+    {
+        String text = "Chart Handle clicked";
+        Snackbar.make(this.getView(), text, Snackbar.LENGTH_LONG).show();
     }
 
     private String mapChunkToName(int id)

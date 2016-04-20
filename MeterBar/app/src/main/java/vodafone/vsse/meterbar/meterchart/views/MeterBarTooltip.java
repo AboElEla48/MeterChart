@@ -12,7 +12,7 @@ import vodafone.vsse.meterbar.meterchart.utils.PaintUtil;
 
 /**
  * Created by AboElEla on 4/19/2016.
- *
+ * <p/>
  * This is the view of the tooltip drawn on bar
  */
 public class MeterBarTooltip
@@ -30,6 +30,7 @@ public class MeterBarTooltip
 
     /**
      * Draw tooltip
+     *
      * @param canvas
      * @param x
      * @param y
@@ -82,7 +83,7 @@ public class MeterBarTooltip
         y += textPadding + oneLineHeight;
         int lineWidth;
         int textX;
-        for(String line : lines)
+        for (String line : lines)
         {
             // draw text centered
             bounds = new Rect();
@@ -101,7 +102,7 @@ public class MeterBarTooltip
 
     private final int textPadding = 10;
     private final int lineSpacing = 4;
-    private final int arrowHeight  = 25;
-    private final int arrowWidth  = 30;
+    private final int arrowHeight = 25;
+    private final int arrowWidth = 30;
     private final int tooltipMargin = arrowHeight + 20;
 }

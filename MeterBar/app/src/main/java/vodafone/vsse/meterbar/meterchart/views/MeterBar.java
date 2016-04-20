@@ -1,20 +1,22 @@
 package vodafone.vsse.meterbar.meterchart.views;
 
 import android.graphics.Canvas;
+
 import java.util.ArrayList;
+
 import vodafone.vsse.meterbar.meterchart.listeners.MeterChartListener;
 import vodafone.vsse.meterbar.meterchart.models.MeterBarChunkModel;
 import vodafone.vsse.meterbar.meterchart.models.MeterBarModel;
-import vodafone.vsse.meterbar.meterchart.utils.LogUtil;
 import vodafone.vsse.meterbar.meterchart.utils.PaintUtil;
 
 
 /**
  * Created by AboElEla on 3/27/2016.
- *
+ * <p/>
  * This view represents one bar in Meter Chart component
  */
-public class MeterBar {
+public class MeterBar
+{
 
     /**
      * init bar with bar model
@@ -47,38 +49,33 @@ public class MeterBar {
 
     /**
      * Draw bar chunks
-     *
      */
     private void drawChunks(Canvas canvas)
     {
-        LogUtil.logString("Draw Chunks");
-
-        double heightUnitPerPixel = (double)canvas.getHeight() / meterBarModel.getBarMaxValue();
+        double heightUnitPerPixel = (double) canvas.getHeight() / meterBarModel.getBarMaxValue();
 
         // Adjust Chunks height according to min values
         float barHeight = 0f;
         chunksList = new ArrayList<>();
-        for(MeterBarChunkModel chunkModel : meterBarModel.getBarChunks())
+        for (MeterBarChunkModel chunkModel : meterBarModel.getBarChunks())
         {
             MeterBarChunk chunk = new MeterBarChunk(chunkModel, meterChartListener);
             float chunkHeight = (float) (chunkModel.getValue() * heightUnitPerPixel);
 
             float chunkMinHeight = chunk.calculateMinHeight();
-            if(chunkHeight < chunkMinHeight)
+            if (chunkHeight < chunkMinHeight)
             {
                 if (chunkModel.getValue() == 0)
                 {
                     chunk.setChunkDrawingMode(MeterBarChunk.Chunk_Mode_Zero);
-                }
-                else
+                } else
                 {
                     chunk.setChunkDrawingMode(MeterBarChunk.Chunk_Mode_Min);
                 }
 
                 // Add the min total value
                 barHeight += chunkMinHeight;
-            }
-            else
+            } else
             {
                 barHeight += chunkHeight;
             }
@@ -92,18 +89,13 @@ public class MeterBar {
         barY = y;
 
         // Draw tooltip
-        if(meterBarModel.isTooltipVisible())
+        if (meterBarModel.isTooltipVisible())
         {
             MeterBarTooltip meterBarTooltip = new MeterBarTooltip(meterBarModel.getTooltipModel());
-            meterBarTooltip.drawTooltip(canvas, (int)startX, (int)y, (int)barWidth);
+            meterBarTooltip.drawTooltip(canvas, (int) startX, (int) y, (int) barWidth);
         }
 
-        LogUtil.logBar(meterBarModel);
-        LogUtil.logString("Canvas Height = " + canvas.getHeight());
-        LogUtil.logString("Units = " + heightUnitPerPixel);
-        LogUtil.logString("Bar Height = " + barHeight);
-
-        for(MeterBarChunk chunk : chunksList)
+        for (MeterBarChunk chunk : chunksList)
         {
             MeterBarChunkModel chunkModel = chunk.getMeterBarChunkModel();
             float chunkHeight = 0;
@@ -132,40 +124,32 @@ public class MeterBar {
     }
 
 
-
     /**
      * Check if point inside bar
+     *
      * @param x
      * @param y
      * @return
      */
     public boolean isTouchEventInBar(float x, float y)
     {
-        LogUtil.logString("Touch: Bar ID: " + meterBarModel.getId());
-        LogUtil.logString("Touch: Touch event at : " + x + ", " + y);
-        LogUtil.logString("Touch: Bar Bounds : ");
-        LogUtil.logString("Touch: StartX = " + startX);
-        LogUtil.logString("Touch: StartX + width = " + (startX + barWidth));
-        LogUtil.logString("Touch: barY = " + barY);
-        LogUtil.logString("Touch: barBottom = " + barBottom);
         return PaintUtil.isPointInsideRect(x, y, startX, barY, startX + barWidth, barBottom);
     }
 
     /**
      * Handle touch event on bar
+     *
      * @param x
      * @param y
      */
     public void onTouchEvent(float x, float y)
     {
-        LogUtil.logString("Touch: Handle Touch in Bar");
 
         // ask chunks
-        for(MeterBarChunk chunk : chunksList)
+        for (MeterBarChunk chunk : chunksList)
         {
-            if(chunk.isTouchEventInChunk(x, y))
+            if (chunk.isTouchEventInChunk(x, y))
             {
-                LogUtil.logString("Touch: Chunk in bar found");
 
                 // Handle click on chunk
                 chunk.onTouchEvent(x, y);
@@ -173,7 +157,6 @@ public class MeterBar {
             }
         }
 
-        LogUtil.logString("Touch: Chunks loop in bar finished");
     }
 
 
